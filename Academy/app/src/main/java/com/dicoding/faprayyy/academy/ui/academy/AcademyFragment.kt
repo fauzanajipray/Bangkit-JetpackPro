@@ -34,13 +34,20 @@ class AcademyFragment : Fragment() {
             Log.d("AcademyFragment", "$courses")
 
             val academyAdapter = AcademyAdapter()
-            academyAdapter.setCourses(courses)
+
+            binding.progressBar.visibility = View.VISIBLE
+            viewModel.getCourses().observe(viewLifecycleOwner, {
+                binding.progressBar.visibility = View.GONE
+                academyAdapter.setCourses(it)
+                academyAdapter.notifyDataSetChanged()
+            })
 
             with(binding.rvAcademy) {
                 layoutManager = LinearLayoutManager(context)
                 setHasFixedSize(true)
                 adapter = academyAdapter
             }
+
         }
     }
 

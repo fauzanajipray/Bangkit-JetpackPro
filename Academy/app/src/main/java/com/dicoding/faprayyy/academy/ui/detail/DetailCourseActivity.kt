@@ -2,6 +2,8 @@ package com.dicoding.faprayyy.academy.ui.detail
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -28,12 +30,12 @@ class DetailCourseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val activityDetailCourseBinding = ActivityDetailCourseBinding.inflate(layoutInflater)
-        detailContentBinding = activityDetailCourseBinding.detailContent
+        val binding = ActivityDetailCourseBinding.inflate(layoutInflater)
+        detailContentBinding = binding.detailContent
 
-        setContentView(activityDetailCourseBinding.root)
+        setContentView(binding.root)
 
-        setSupportActionBar(activityDetailCourseBinding.toolbar)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val adapter = DetailCourseAdapter()
@@ -44,14 +46,20 @@ class DetailCourseActivity : AppCompatActivity() {
         if (extras != null) {
             val courseId = extras.getString(EXTRA_COURSE)
             if (courseId != null) {
+                binding.progressBar.visibility = View.VISIBLE
+                binding.content.visibility = View.INVISIBLE
+
                 viewModel.setSelectedCourse(courseId)
-                val modules = viewModel.getModules()
-                adapter.setModules(modules)
-                for (course in DataDummy.generateDummyCourses()) {
-                    if (course.courseId == courseId) {
-                        populateCourse(course)
-                    }
-                }
+                viewModel.getModules().observe(this, {
+                    binding.content.visibility = View.VISIBLE
+                    adapter.setModules(it)
+                    adapter.notifyDataSetChanged()
+                    Log.d(this::class.java.simpleName, "Harusee hide")
+
+                    binding.progressBar.visibility = View.INVISIBLE
+                })
+                viewModel.getCourse().observe(this, { course -> populateCourse(course) })
+
             }
         }
 
